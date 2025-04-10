@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #define USERNAME_SIZE 32
 #define CLUE_SIZE 128
@@ -25,7 +29,7 @@ void log_opperation(const char *hunt_id,const char *message){
     char path[FILENAME_SIZE];
     snprintf(path,sizeof(path),"%s,%s",hunt_id,FILE_INPUT);
 
-    int file = open(path, O_WRONLY | O_CREAT | O_APPEND);
+    int file = open(path, O_WRONLY | O_CREAT | O_APPEND, 0644);
 
     if(file < 0 ){
 
@@ -47,23 +51,23 @@ void log_opperation(const char *hunt_id,const char *message){
  
 void adauga_comoara(const char *file_input, const char *hunt_id){
 
+  mkdir(hunt_id, 0755);
+
   char file_path[FILENAME_SIZE];
   snprintf(file_path,sizeof(file_path),"%s,%s",hunt_id,"treasures.bin");
 
-  int file = open(file_path, O_WRONLY | O_CREAT | O_APPEND);
+  int file = open(file_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
 
-    if(file < 0 ){
-
+    if(file < 0){
       perror("eroare la deschiderea fisierlui la adaugare \n");
       return;
     }
 
-    FILE *f_input = fopen(file_input,"r");
-    if(f_input){
-
-      perror("eroare de la deschiderea fisierului de input");
-      close(file);
-      return;
+    FILE *f_input = fopen(file_input, "r");
+    if (!f_input) {
+        perror("fopen input file");
+        close(file);
+        return;
     }
 
     Treasure t;
@@ -146,6 +150,67 @@ void view_treasure(const char *hunt_id,int id){
   close(file);
 }
 
+void sterge_treasure(const char *hunt_id, int id){
+  char f_input[FILENAME_SIZE];
+  snprintf(f_input,sizeof(f_input),"%s , %s",hunt_id,"treasures.bin");
+
+  int f;
+  if ((f = open(f_input, O_RDONLY)) < 0){
+    perror("Eroare la deschiderea fisierului de stergere");
+    return;
+  }
+
+  int f_temp = open("temp.bin", O_WRONLY| O_CREAT | O_TRUNC, 0644);
+  if(f_temp < 0){
+    perror("Eroare la deschiderea fisierului temporar in stergere");
+    close(f);
+    return;
+  }
+
+  Treasure t;
+  int found = 0;
+  while (read(f,&t,sizeof(Treasure)) == sizeof(Treasure)){
+    if (t.treasure_id != id) {
+      write(f_temp, &t, sizeof(Treasure));
+  } else {
+      found = 1;
+  }
+}
+  close(f);
+  close(f_temp);
+  
+  if(found==0){
+
+    printf("Comoara nu a fost gasita\n");
+    remove("temp.bin");
+    return;
+  }
+
+  rename("temp.bin",f_input);
+  char msg[128];
+  snprintf(msg,sizeof(msg),"Remove trasure %d", id);
+  log_opperation(hunt_id,msg);
+
+  close(f);
+  close(f_temp);
+}
+
+void stergere_hunt(const char *hunt_id){
+
+  char f_input[FILENAME_SIZE];
+  snprintf(f_input,sizeof(f_input),"%s,%s",hunt_id,"treasures.bin");
+  remove(f_input);
+  
+  snprintf(f_input,sizeof(f_input),"%s,%s",hunt_id,FILE_INPUT);
+  remove(f_input);
+
+  rmdir(hunt_id);
+
+  char msg[128];
+  snprintf(msg,sizeof(msg),"Remove hunt %s",hunt_id);
+  log_opperation(hunt_id,msg);
+}
+
 int main(int argc,char **argv){
 
   if(argc<3){
@@ -164,6 +229,10 @@ int main(int argc,char **argv){
     lista_treasure(hunt_id);
   }else if(strcmp(command,"--view") == 0 && argc == 4){
     view_treasure(hunt_id,atoi(argv[3]));
+  }else if(strcmp(command,"--remove_treasure") == 0 && argc == 5){
+    sterge_treasure(hunt_id,atoi(argv[4]));
+  }else if(strcmp(command,"--remove_hunt") == 0 && argc == 4){
+    stergere_hunt(hunt_id);
   }
   else{
     perror("Eroare la comanda data \n");
