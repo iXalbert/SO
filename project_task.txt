@@ -1,0 +1,25 @@
+Treasure hunt game
+
+-treasure_manager.c
+-creeze si organizeze date in fisiere
+-adaugam, stergem, listam din fisiere
+-vedem detalii specifice pentru un treasure
+-logging la fiecare actiune a userului
+-open, read, write, close, lseek, stat, mkdir
+
+treasure => folder
+   -binary file
+   -log file
+
+/project_root
+|
+| - treasure_manager.c
+| - Hunt001/
+  | -treasure.dat  ->treasure records
+  |_ logged_hunt -> log text file
+.
+.
+.
+.
+.
+| - logged_hunt - Hunt001 -> sym.link
