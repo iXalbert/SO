@@ -1,0 +1,44 @@
+Acestea sunt comenzile pe care le-am folosit pe parcursul creari programului :
+
+Pt compilare :
+gcc -Wall -o treasure_manager treasure_manager.c treasure_operations.c 
+
+Eroare la prima comanda :
+./treasure_manager add - eroare
+./treasure_manager add Hunt001 treasure_input1.txt -eroare
+./treasure_manager Hunt001  treasure_intput1.txt -eroare
+./treasure_manager add treasure_input1.txt -eroare
+
+Adaugarea tresure la un Hunt :
+./treasure_manager --add Hunt001 treasure_input1.txt
+./treasure_manager --add Hunt001 treasure_input2.txt
+./treasure_manager --add Hunt002 treasure_input3.txt
+./treasure_manager --add Hunt003 treasure_input4.txt
+./treasure_manager --add Hunt003 treasure_input5.txt
+./treasure_manager --add Hunt003 treasure_input6.txt
+./treasure_manager --add Hunt004 treasure_input7.txt
+./treasure_manager --add Hunt004 treasure_input8.txt
+
+Listarea Hunt-urilor : 
+./treasure_manager --list Hunt001
+./treasure_manager --list Hunt002
+./treasure_manager --list Hunt003
+./treasure_manager --list Hunt004
+
+Vizualizarea unui treasure dupa id dintr-un Hunt :
+./treasure_manager --view Hunt001 1 - eroare 
+./treasure_manager --view Hunt002 101 - eroare
+./treasure_manager --view Hunt001 101 - corect
+
+Stergerea unui treasure dupa id dintr-un Hunt :
+./treasure_manager --remove_treasure Hunt003 1 - eroare
+./treasure_manager --remove_treasure Hunt003 76 - corect
+
+Vizualizare sa vedem ca a sters treasureul : 
+./treasure_manager --list Hunt003
+
+Stergerea unui Hunt:
+./treasure_manager --remove_hunt Hunt002
+
+Verificare symlink : 
+ls -l logged_hunt-*
