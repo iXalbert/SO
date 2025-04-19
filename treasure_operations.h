@@ -18,7 +18,7 @@ typedef struct {
     int value;
   } Treasure;
 
-
+  void log_opperation(const char *hunt_id,const char *message);
   void adauga_comoara(const char *file_input, const char *hunt_id);
   void lista_treasure(const char *hunt_id);
   void view_treasure(const char *hunt_id, int id);
