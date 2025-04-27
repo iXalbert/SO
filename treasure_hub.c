@@ -28,7 +28,7 @@ void sigchld_handler(int signo){
 void start_monitor(){
 
     if(monitor_running){
-        printf("Monitor deja ruleaza \n");
+        printf("Monitor - deja ruleaza \n");
         exit(-1);
     }
 
@@ -45,7 +45,7 @@ void start_monitor(){
     }
     else{
         monitor_running = 1;
-        printf("Monitor a inveput cu PID %d \n", monitor_pid);
+        printf("Monitor - a inveput cu PID %d \n", monitor_pid);
     }
 
 }
@@ -53,7 +53,7 @@ void start_monitor(){
 void send_comanda(const char* comanda, const char *args){
 
     if(!monitor_running){
-        perror("Monitorul nu ruleaza \n");
+        perror("Monitorul - nu ruleaza \n");
         exit(-1);
     }
 
