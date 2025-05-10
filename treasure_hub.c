@@ -3,113 +3,125 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/wait.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
-#define CMD_FILE "monitor_cmd.txt"
-#define ARG_FILE "monitor_args.txt"
+pid_t mon_pid = -1;
+int pipe_fd[2]; 
 
-static pid_t mon_pid = -1;
-static int waiting_stop = 0;
-
-static void on_sigchld(int sig) {
-    int status;
-    wait(&status);
-    printf(" Monitor : a terminat statusul");
-    mon_pid      = -1;
-    waiting_stop = 0;
-}
-
-static void write_file(const char *path, const char *s) {
-    int fis = open(path, O_WRONLY|O_CREAT|O_TRUNC, 0644);
-    if (fis < 0) {
-        perror("open");
-        exit(-1);
+void start_monitor() {
+    if (mon_pid > 0) {
+        write(STDOUT_FILENO, "Monitor deja ruleaza\n", 23);
+        return;
     }
-    write(fis, s, strlen(s));
-    close(fis);
+
+    if (pipe(pipe_fd) < 0) {
+        perror("Eroare pipe");
+        return;
+    }
+
+    mon_pid = fork();
+    if (mon_pid < 0) {
+        perror("Eroare fork");
+        return;
+    }
+
+    if (mon_pid == 0) {
+        close(pipe_fd[0]); 
+        dup2(pipe_fd[1], STDOUT_FILENO); 
+        execl("./monitor", "monitor", NULL);
+        perror("Eroare execl");
+        exit(1);
+    }
+
+    close(pipe_fd[1]); 
+    write(STDOUT_FILENO, "Monitor pornit\n", 17);
 }
 
-static void trimite_comanda(const char *command, const char *args) {
-    write_file(CMD_FILE, command);
-    write_file(ARG_FILE, args ? args : "");
-    kill(mon_pid, SIGUSR1);
+void stop_monitor() {
+    if (mon_pid <= 0) {
+        write(STDOUT_FILENO, "Monitor nu ruleaza\n", 21);
+        return;
+    }
+
+    kill(mon_pid, SIGTERM);
+    waitpid(mon_pid, NULL, 0);
+    close(pipe_fd[0]);
+    mon_pid = -1;
+    write(STDOUT_FILENO, "Monitor oprit\n", 14);
+}
+
+void citeste_de_la_monitor() {
+    char buf[1024];
+    ssize_t n = read(pipe_fd[0], buf, sizeof(buf) - 1);
+    if (n > 0) {
+        buf[n] = '\0';
+        write(STDOUT_FILENO, buf, n);
+    } else {
+        write(STDOUT_FILENO, "Nu am primit date de la monitor\n", 33);
+    }
+}
+
+void trimite_semnal(int semnal) {
+    if (mon_pid <= 0) {
+        write(STDOUT_FILENO, "Monitor nu ruleaza\n", 20);
+        return;
+    }
+
+    kill(mon_pid, semnal);
+    citeste_de_la_monitor();
+}
+
+void calculeaza_scor(const char *hunt_name) {
+    pid_t pid = fork();
+    if (pid == 0) {
+        char path[256];
+        snprintf(path, sizeof(path), "%s/treasures.dat", hunt_name);
+        int fd = open(path, O_RDONLY);
+        if (fd < 0) {
+            perror("Eroare deschidere treasures.dat");
+            exit(1);
+        }
+        dup2(fd, STDIN_FILENO);
+        execl("./score_calculator", "score_calculator", NULL);
+        perror("Eroare execl score_calculator");
+        exit(1);
+    } else {
+        waitpid(pid, NULL, 0);
+    }
 }
 
 int main() {
-    struct sigaction sa = {
-        .sa_handler = on_sigchld,
-        .sa_flags   = SA_RESTART
-    };
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGCHLD, &sa, NULL);
+    char linie[256];
 
-    char line[256];
     while (1) {
-        printf("hub> "); fflush(stdout);
-        if (!fgets(line, sizeof(line), stdin)) break;
-        line[strcspn(line, "\n")] = '\0';
+        write(STDOUT_FILENO, "hub> ", 5);
+        ssize_t n = read(STDIN_FILENO, linie, sizeof(linie) - 1);
+        if (n <= 0) break;
 
-        if (waiting_stop) {
-            printf("Monitor : Asteptam sa se inchida \n");
-            continue;
-        }
+        linie[n] = '\0';
+        linie[strcspn(linie, "\n")] = '\0';
 
-        if (strcmp(line, "start_monitor") == 0) {
+        if (strcmp(linie, "start_monitor") == 0) {
+            start_monitor();
+        } else if (strcmp(linie, "stop_monitor") == 0) {
+            stop_monitor();
+        } else if (strcmp(linie, "list_hunts") == 0) {
+            trimite_semnal(SIGUSR1);
+        } else if (strncmp(linie, "list_treasures ", 15) == 0) {
+            trimite_semnal(SIGUSR2);
+        } else if (strncmp(linie, "view_treasure ", 14) == 0) {
+            trimite_semnal(SIGINT);
+        } else if (strncmp(linie, "calculate_score ", 16) == 0) {
+            calculeaza_scor(linie + 16);
+        } else if (strcmp(linie, "exit") == 0) {
             if (mon_pid > 0) {
-                printf("Monitor deja lucreaza \n");
-            } else {
-                mon_pid = fork();
-                if (mon_pid < 0) {
-                    perror("fork");
-                    exit(1);
-                } else if (mon_pid == 0) {
-                    execl("./monitor", "./monitor", NULL);
-                    perror("execl");
-                    exit(1);
-                } else {
-                    printf("Monitor a inceput )\n");
-                }
-            }
-        }
-        else if (strcmp(line, "list_hunts") == 0) {
-            if (mon_pid < 0) {
-                printf("Monitor nu ruleaza\n");
-            } else {
-                trimite_comanda("list_hunts", "");
-            }
-        }
-        else if (strncmp(line, "list_treasures ", 15) == 0) {
-            if (mon_pid < 0) {
-                printf("Monitor nu ruleaza\n");
-            } else {
-                trimite_comanda("list_treasures", line + 15);
-            }
-        }
-        else if (strncmp(line, "view_treasure ", 14) == 0) {
-            if (mon_pid < 0) {
-                printf("Monitor nu ruleaza\n");
-            } else {
-                trimite_comanda("view_treasure", line + 14);
-            }
-        }
-        else if (strcmp(line, "stop_monitor") == 0) {
-            if (mon_pid < 0) {
-                printf("Monitor nu ruleaza\n");
-            } else {
-                trimite_comanda("stop_monitor", "");
-                waiting_stop = 1;
-            }
-        }
-        else if (strcmp(line, "exit") == 0) {
-            if (mon_pid > 0) {
-                printf("Monitor nu ruleaza\n");
+                write(STDOUT_FILENO, "Inca merge monitorul\n", 30);
             } else {
                 break;
             }
-        }
-        else {
-            printf("Comanda ne identificata \n");
+        } else {
+            write(STDOUT_FILENO, "Comanda necunoscuta\n", 22);
         }
     }
 

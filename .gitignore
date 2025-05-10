@@ -1,0 +1,53 @@
+# Compiled binary executables
+*
+!*/
+!*.c
+!*.h
+!*.nim
+!*.txt
+!*.md
+!.gitignore
+
+# Allow specific text files but exclude temporary ones
+*~
+\#*\#
+*.swp
+*.swo
+
+# Binary files
+*.o
+*.out
+*.exe
+monitor
+treasure_hub
+treasure_manager
+score_calculator
+
+# Debug symbols
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.sublime-workspace
+
+# Temporary editor backup files
+*~
+\#*\#
+.#*
+
+# Binary data files
+*.bin
+

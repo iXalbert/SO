@@ -107,7 +107,7 @@ void adauga_comoara(const char *file_input, const char *hunt_id)
     }
     t.treasure_id = atoi(line);
 
-    line = strtok(buffer,"\n");
+    line = strtok(NULL,"\n");
     if(!line)
     {
       perror("Format invalid 2 \n");
@@ -117,7 +117,7 @@ void adauga_comoara(const char *file_input, const char *hunt_id)
     strncpy(t.username,line,USERNAME_SIZE);
     t.username[USERNAME_SIZE-1]='\0';
 
-    line = strtok(buffer,"\n");
+    line = strtok(NULL,"\n");
     if(!line)
     {
       perror("Format invalid 3 \n");
@@ -126,7 +126,7 @@ void adauga_comoara(const char *file_input, const char *hunt_id)
     }
     t.longitude = atof(line);
 
-    line = strtok(buffer,"\n");
+    line = strtok(NULL,"\n");
     if(!line)
     {
       perror("Format invalid 4 \n");
@@ -135,7 +135,7 @@ void adauga_comoara(const char *file_input, const char *hunt_id)
     }
     t.latitude = atof(line);
 
-    line = strtok(buffer,"\n");
+    line = strtok(NULL,"\n");
     if(!line)
     {
       perror("Format invalid 5 \n");
@@ -145,7 +145,7 @@ void adauga_comoara(const char *file_input, const char *hunt_id)
     strncpy(t.clue,line,USERNAME_SIZE);
     t.clue[USERNAME_SIZE-1]='\0';
 
-    line = strtok(buffer,"/n");
+    line = strtok(NULL,"\n");
     if(!line)
     {
       perror("Format invalid 6 \n");
@@ -186,7 +186,8 @@ void lista_treasure(const char *hunt_id)
   if(!(file_exist(f_input)))
   {
       perror("Fisierul nu exista \n");
-      exit(-1);  
+      return;
+      //exit(-1);  
   }
 
   int file = open(f_input, O_RDONLY);
@@ -227,7 +228,8 @@ void view_treasure(const char *hunt_id,int id)
   if(!(file_exist(f_input)))
   {
       perror("Fisierul nu exista \n");
-      exit(-1);  
+      return;
+      //exit(-1);  
   }
 
   int file = open(f_input, O_RDONLY);

@@ -1,0 +1,33 @@
+creerea fisierelor monitor_comanda.txt si monitor_args.txt
+
+gcc -o monitor monitor.c treasure_operations.c
+
+gcc -o treasure_hub treasure_hub.c treasure_operations.c
+
+./treasure_hub
+
+stop_monitor
+
+exit
+
+list_hunts
+
+start_monitor
+
+list_hunts
+
+list_treasures Hunt008
+
+list_treasures Hunt001
+
+view_treasure Hunt001 3
+
+view_treasure Hunt001 101
+
+exit
+
+start_monitor
+
+stop_monitor
+
+exit
