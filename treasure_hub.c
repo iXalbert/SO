@@ -18,12 +18,14 @@ void start_monitor() {
     if (pipe(pipe_fd) < 0) {
         perror("Eroare pipe");
         return;
+        //exit(-1)
     }
 
     mon_pid = fork();
     if (mon_pid < 0) {
         perror("Eroare fork");
         return;
+        //exit(-1);
     }
 
     if (mon_pid == 0) {

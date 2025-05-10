@@ -18,6 +18,6 @@ int main(){
     }
 
     printf("Total Score : %d \n", scor_total);
-
+//
     return 0;
 }

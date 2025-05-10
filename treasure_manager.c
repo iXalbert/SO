@@ -52,6 +52,7 @@ int main(int argc,char **argv)
   {
     write(STDERR_FILENO, "Eroare la comanda data \n", strlen("Eroare la comanda data \n"));
     return 1;
+    //exit(-1);
   }
   return 0;
 }

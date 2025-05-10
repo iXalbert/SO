@@ -167,20 +167,20 @@ void handle_sigusr2(int signo){
                     write(STDOUT_FILENO, output_buffer, strlen(output_buffer));
                 }
                 
-                // Print summary
                 if (count == 0) {
-                    sprintf(output_buffer, "No treasures found in %s\n", entry->d_name);
+                    sprintf(output_buffer, "Comoara nu a fost gasita %s\n", entry->d_name);
                     write(STDOUT_FILENO, output_buffer, strlen(output_buffer));
                 } else {
-                    sprintf(output_buffer, "Total treasures: %d\n", count);
+                    sprintf(output_buffer, "Total de comori %d\n", count);
                     write(STDOUT_FILENO, output_buffer, strlen(output_buffer));
                 }
                 
                 close(fis);
             } else {
                 char output_buffer[128];
-                sprintf(output_buffer, "Could not open treasure file for %s\n", entry->d_name);
-                write(STDOUT_FILENO, output_buffer, strlen(output_buffer));
+                sprintf(output_buffer, "Nu s a pututu deschide fisierul %s\n", entry->d_name);
+                write(STDOUT_FILENO, output_buffer, strlen(output_buffer));\
+                //exit(-1);
             }
         }
     }

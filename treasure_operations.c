@@ -238,6 +238,7 @@ void view_treasure(const char *hunt_id,int id)
   {
     perror("eroare la deschiderea fisierlui la view\n");
     return;
+    //exit(-1)
   }  
 
  Treasure t;
