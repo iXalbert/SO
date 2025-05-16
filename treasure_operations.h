@@ -26,6 +26,4 @@ typedef struct {
   void sterge_hunt(const char *hunt_id);
 
 
-//
-
 #endif
