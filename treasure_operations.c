@@ -210,10 +210,23 @@ void lista_treasure(const char *hunt_id)
 
   Treasure t;
 
+  printf("\nLista comori pentru %s:\n", hunt_id);
+  printf("+------+------------------+----------+\n");
+  printf("| ID   | Username         | Valoare  |\n");
+  printf("+------+------------------+----------+\n");
+
+  int total_comori = 0;
+  int valoare_totala = 0;
+
   while (read(file,&t,sizeof(Treasure)) == sizeof(Treasure))
   { 
-    printf("ID : %d, User : %s, Lat : %.2f, Lon : %.2f, Value : %d, Clue : %s \n", t.treasure_id, t.username, t.latitude, t.longitude, t.value, t.clue);
+    printf("| %-4d | %-16s | %-8d |\n", t.treasure_id, t.username, t.value);
+    total_comori++;
+    valoare_totala += t.value;
   }
+
+  printf("+------+------------------+----------+\n");
+  printf("Total comori: %d | Valoare totala: %d\n", total_comori, valoare_totala);
 
   close(file);
   
